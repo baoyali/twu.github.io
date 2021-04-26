@@ -1,0 +1,126 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="initial-scale=1,maximum-scale=1,user-scalable=no"
+    />
+    <title>
+      Intro to MapView - Create a 2D map | Sample | ArcGIS API for JavaScript
+      4.19
+    </title>
+    <style>
+     
+       html,body
+        {
+            margin:0;
+            height:100%;
+            width:100%;
+            padding:0;
+             }
+      #viewDiv1
+      {
+        height:10%;
+        width:100%;
+        background-color:Gray;
+        
+        
+    }
+        #viewDiv{
+        height:90%;
+        width:80%;
+        float:left;
+    }
+        #viewDiv2{
+        height:90%;
+        width:20%;
+        float:left;
+    }
+    
+    </style>
+
+    <link
+      rel="stylesheet"
+      href="https://js.arcgis.com/4.19/esri/themes/light/main.css"
+    />
+    <script src="https://js.arcgis.com/4.19/"></script>
+
+    <script>
+            
+
+            require(["esri/Map", "esri/views/MapView","esri/layers/FeatureLayer","esri/widgets/Legend","esri/widgets/ScaleBar","esri/widgets/Search","esri/widgets/BasemapGallery","esri/widgets/LayerList"], (Map, MapView,FeatureLayer,Legend,ScaleBar,Search,BasemapGallery,LayerList) => {
+           var layer = new FeatureLayer({
+        // URL to the service
+        url: "http://www.arcgisonline.cn/server/rest/services/Hosted/%E5%8C%97%E4%BA%AC%E5%B8%82%E5%85%AC%E5%85%B1%E4%BA%8B%E4%BB%B6/FeatureServer"
+      });
+
+            var map = new Map({
+                basemap: "topo",
+                layers:[layer]
+              });
+             // map.layers.add();
+              var view1 = new MapView({
+    container: "viewDiv2", // Reference to the DOM node that will contain the view
+       map: map // References the map object created in step 3
+  });
+               var view2 = new MapView({
+    container: "viewDiv", // Reference to the DOM node that will contain the view
+       //map: map // References the map object created in step 3
+  });
+
+              var view = new MapView({
+                container: "viewDiv",
+                map: map,
+                zoom: 4,
+                center: [15, 65] // longitude, latitude
+              });
+     
+            
+              var legend = new Legend({
+                 view: view,
+              layerInfos: [{
+              layer: layer,
+                  title: "公共事件"
+        }]
+      });
+      view.ui.add(legend, "bottom-right");
+                var scaleBar = new ScaleBar({
+                view:view,
+                style:"ruler",
+                unit:"non-metric"
+});
+// Add widget to the bottom left corner of the view
+view.ui.add(scaleBar, {position: "bottom-left"});
+          var searchWidget = new Search({
+  view: view
+});
+// Adds the search widget below other elements in
+// the top left corner of the view
+view.ui.add(searchWidget, {
+  position: "top-right",
+  index: 2
+});    
+         var basemapGallery = new BasemapGallery({
+               view: view1
+                    });
+         view1.ui.add(basemapGallery);
+          var layerList = new LayerList({
+  view: view
+});
+// Adds widget below other elements in the top left corner of the view
+view.ui.add(layerList, {
+  position: "top-left" });
+
+
+            });
+    </script>
+  </head>
+
+  <body>
+    
+    <div id="viewDiv1">
+    <h1>北京公共事件</h1>  </div>
+    <div id="viewDiv"></div>
+    <div id="viewDiv2"></div>
+  </body>
+</html>
