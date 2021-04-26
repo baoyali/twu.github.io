@@ -1,0 +1,290 @@
+﻿<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="initial-scale=1,maximum-scale=1,user-scalable=no"
+    />
+    <title>
+      ImageryTileLayer - shaded relief renderer | Sample | ArcGIS API for
+      JavaScript 4.18
+    </title>
+
+    <link
+      rel="stylesheet"
+      href="https://js.arcgis.com/4.18/esri/themes/light/main.css"
+    />
+    <script src="https://js.arcgis.com/4.18/"></script>
+
+    <style>
+    
+             html,body
+        {
+            margin:0;
+            height:100%;
+            width:100%;
+            padding:0;
+             }
+             
+             #headDiv{
+              height: 10%;
+             width: 100%; 
+             background-color:lightblue;
+             float:left;
+             text-align:center;
+             }
+             
+            #GalleryDiv{
+        height:90%;
+        width:20%;
+        float:right;
+    } 
+             
+             #viewDiv{
+        height:90%;
+        width:80%;
+        float:right;
+    }
+        
+    
+  
+     
+    </style>
+
+    <script>
+      require([
+        "esri/Map",
+        "esri/views/MapView",
+        "esri/layers/ImageryTileLayer",
+        "esri/renderers/RasterShadedReliefRenderer",
+        "esri/widgets/Slider",
+        "esri/widgets/Expand",
+        "esri/tasks/support/MultipartColorRamp",
+        "esri/layers/TileLayer",
+        "esri/widgets/Legend",
+        "esri/widgets/ScaleBar",
+        "esri/widgets/BasemapGallery",
+        "esri/widgets/LayerList",
+        "esri/widgets/Search"
+      ], function (
+        Map,
+        MapView,
+        ImageryTileLayer,
+        RasterShadedReliefRenderer,
+        Slider,
+        Expand,
+        MultipartColorRamp,
+        TileLayer,
+        Legend,
+        ScaleBar,
+        BasemapGallery,
+        LayerList,
+        Search
+      ) {
+        // set the hillshade type for the shaded relief renderer
+        // let hillshadeType = "traditional";
+        // const url =
+        //     "https://elevation3d.arcgis.com/arcgis/rest/services/WorldElevation3D/Terrain3D/ImageServer";
+
+        // create a colorRamp
+        const colorRamp = MultipartColorRamp.fromJSON({
+          type: "multipart",
+          colorRamps: [
+            {
+              fromColor: [175, 240, 233],
+              toColor: [255, 255, 179]
+            },
+            {
+              fromColor: [255, 255, 179],
+              toColor: [0, 128, 64]
+            },
+            {
+              fromColor: [0, 128, 64],
+              toColor: [252, 186, 3]
+            },
+            {
+              fromColor: [252, 186, 3],
+              toColor: [128, 0, 0]
+            },
+            {
+              fromColor: [120, 0, 0],
+              toColor: [105, 48, 13]
+            },
+            {
+              fromColor: [105, 48, 13],
+              toColor: [171, 171, 171]
+            },
+            {
+              fromColor: [171, 171, 171],
+              toColor: [255, 252, 255]
+            }
+          ]
+        });
+
+        // set the shaded relief renderer parameters
+        const renderer = new RasterShadedReliefRenderer({
+          altitude: 45,
+          azimuth: 315,
+          hillshadeType: hillshadeType,
+          zFactor: 1,
+          scalingType: "adjusted",
+          colorRamp: colorRamp
+        });
+
+        let layer1 = new TileLayer({
+          // URL points to a cached tiled map service hosted on ArcGIS Server
+          url:
+            "http://www.arcgisonline.cn/server/rest/services/Hosted/NaturalDisasters_RasterTile_Chapter6/MapServer"
+        });
+
+        //const layer = new ImageryTileLayer({
+        // url: url,
+        //renderer: renderer
+        // });
+
+        const map = new Map({
+          basemap: "topo",
+          layers: [layer1]
+        });
+
+    const view1 = new MapView({
+    container: "headDiv", // Reference to the DOM node that will contain the view
+    //map: map // References the map object created in step 3
+  });
+  
+
+        const viewMap = new MapView({
+          container: "viewDiv",
+          map: map,
+          zoom: 7,
+          center: [120, 20]
+        });
+     
+      var view2 = new MapView({
+    container: "GalleryDiv", // Reference to the DOM node that will contain the view
+    map: map // References the map object created in step 3
+  });
+  
+  
+   var searchWidget = new Search({
+  view: viewMap
+});
+// Adds the search widget below other elements in
+// the top left corner of the view
+viewMap.ui.add(searchWidget, {
+  position: "top-right",
+  index: 2
+});
+  
+  
+  var layerList = new LayerList({
+  view: viewMap
+  });
+// Adds widget below other elements in the top left corner of the view
+   viewMap.ui.add(layerList, {
+    position: "top-left"
+});
+
+
+        
+        var legend = new Legend({
+          view: viewMap,
+          layerInfos: [
+            {
+              layer: layer1,
+              title: "地震次数"
+             
+            }
+          ]
+        });
+
+        viewMap.ui.add(legend, "bottom-right");
+
+        var scaleBar = new ScaleBar({
+          view:viewMap,
+          style: "ruler",
+          unit: "metric"
+        });
+        // Add widget to the bottom left corner of the view
+       viewMap.ui.add(scaleBar, {
+          position: "bottom-left"
+        });
+
+
+       const basemapGallery = new BasemapGallery({
+      view: view2,
+      container: GalleryDiv
+    });
+
+// Add the widget to the top-right corner of the view
+    view2.ui.add(basemapGallery, {
+ // position: "top-right"
+});
+       
+
+       
+        // make the renderer grayscale or use the colorramp
+        var colorRampCheckBox = document.getElementById("tinted");
+        colorRampCheckBox.addEventListener("click", function (val) {
+          if (!layer.loaded) {
+            return;
+          }
+          var renderer = layer.renderer.clone();
+          renderer.colorRamp = colorRampCheckBox.checked ? colorRamp : null;
+          layer.renderer = renderer;
+        });
+
+        // adjust the scalingType for the renderer
+        var adjustBox = document.getElementById("adjust");
+        adjustBox.addEventListener("click", function (val) {
+          if (!layer.loaded) {
+            return;
+          }
+          var renderer = layer.renderer.clone();
+          renderer.scalingType = adjustBox.checked ? "adjusted" : "none";
+          layer.renderer = renderer;
+        });
+      });
+      
+    </script>
+  </head>
+
+  <body>
+   <div id="headDiv"> </div>
+    <div id="viewDiv"></div>
+   <div id="GalleryDiv"></div>
+   
+    <div id="rendererDiv" class="esri-widget">
+      <h3 class="esri-widget__heading">Shaded Relief Parameters</h3>
+      <label class="esri-feature-form__label">Select type</label>
+      <select id="hillshadeType" class="esri-input esri-select">
+        <option value="traditional" selected>traditional</option>
+        <option value="multi-directional">multi-directional</option>
+      </select>
+      <br />
+      <label id="zFactorLabel" class="esri-feature-form__label"
+        >Exaggeration Factor:</label
+      >
+      <div id="zFactor-slider" class="slider"></div>
+      <div id="traditionalStuff">
+        <label id="altitudeLabel" class="esri-feature-form__label"
+          >Sun Altitude:</label
+        >
+        <div id="altitude-slider" class="slider"></div>
+        <label id="azimuthLabel" class="esri-feature-form__label"
+          >Sun Azimuth:</label
+        >
+        <div id="azimuth-slider" class="slider"></div>
+      </div>
+      <input type="checkbox" id="tinted" checked="true" /><label
+        >Tinted hillshade</label
+      ><br />
+      <input type="checkbox" id="adjust" checked="true" /><label
+        >Adjust for large scale</label
+      >
+    </div>
+   
+   
+  </body>
+</html>
